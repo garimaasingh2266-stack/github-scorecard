@@ -99,8 +99,8 @@ function Index() {
           <Textarea
             value={links}
             onChange={(e) => setLinks(e.target.value)}
-            placeholder="Optional: portfolio, X, LinkedIn, YouTube links (one per line)"
-            rows={2}
+            placeholder={"Optional, one per line with a short note, e.g.\nhttps://youtube.com/@me — demo of my n8n + MCP workflow"}
+            rows={3}
             className="resize-none text-sm"
           />
           <div className="flex items-center justify-between gap-3">
@@ -225,6 +225,40 @@ function Index() {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            <div className="panel p-6">
+              <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                evidence used ({result.repos.length + result.links.length})
+              </h3>
+              {result.repos.length + result.links.length === 0 ? (
+                <p className="mt-4 text-sm text-muted-foreground">No repositories or links found.</p>
+              ) : (
+                <ul className="mt-4 space-y-2">
+                  {result.links.map((l, i) => (
+                    <li key={`l${i}`} className="flex items-start gap-3 text-sm">
+                      <Badge variant="outline" className="shrink-0 font-mono text-[10px]">{l.kind}</Badge>
+                      <div className="min-w-0">
+                        <a href={l.url} target="_blank" rel="noreferrer" className="block truncate font-mono text-primary hover:underline">
+                          {l.url}
+                        </a>
+                        {l.description ? <p className="text-xs text-muted-foreground">{l.description}</p> : null}
+                      </div>
+                    </li>
+                  ))}
+                  {result.repos.map((r) => (
+                    <li key={`r${r.name}`} className="flex items-start gap-3 text-sm">
+                      <Badge variant="secondary" className="shrink-0 font-mono text-[10px]">Repo</Badge>
+                      <div className="min-w-0">
+                        <a href={`${result.profile.url}/${r.name}`} target="_blank" rel="noreferrer" className="block truncate font-mono hover:underline">
+                          {r.name}
+                        </a>
+                        {r.description ? <p className="truncate text-xs text-muted-foreground">{r.description}</p> : null}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </section>
         ) : null}

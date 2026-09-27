@@ -131,19 +131,30 @@ export const screenApplicant = createServerFn({ method: "POST" })
       .sort((a, b) => b.stars - a.stars || b.updated.localeCompare(a.updated))
       .slice(0, 40);
 
+    const links = parseLinks(data.links);
+
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured for this app yet.");
 
     const prompt = [
-      "You are screening a candidate for an AI-focused internship. Score strictly from evidence in their public GitHub data; absence of evidence means a low score. Scores are 0-10 and may use one decimal.",
+      "You are screening a candidate for an AI-focused internship. Score strictly from evidence; absence of evidence means a low score. Scores are 0-10 and may use one decimal.",
+      "Evidence comes from TWO equal sources: their public GitHub data AND the links they provided (each with the applicant's own description). Links count as real evidence even if the applicant has zero GitHub repositories — never score 0 across the board just because GitHub is empty.",
+      "",
+      "How to use links:",
+      "- Instagram, YouTube, TikTok (and similar social/video platforms): evidence for 'Social media & content strategy' and 'AI content creation'.",
+      "- Demo videos (e.g. YouTube/Loom/Vimeo showing a tool or workflow, or described as a demo): evidence for 'Automation & architecture' and 'AI content creation'.",
+      "- Portfolio / personal sites / deployed apps: evidence for 'AI-assisted coding & deployment'.",
+      "- Use the applicant's description text next to each link to understand what it shows. You cannot open links; judge from the URL and description.",
       "",
       `Profile: ${JSON.stringify(profile)}`,
-      `Repositories: ${JSON.stringify(repos)}`,
-      data.links ? `Other links provided by the applicant: ${data.links}` : "No extra links provided.",
+      `Repositories (${repos.length}): ${JSON.stringify(repos)}`,
+      links.length
+        ? `Applicant links (${links.length}): ${JSON.stringify(links)}`
+        : "No extra links provided.",
       "",
       "Criteria: " + CRITERIA.map((c, i) => `${i + 1}) ${c.label}`).join("; "),
       "",
-      "Write the summary as exactly 3 short lines (max 18 words each). 'strongestSignal' names the single most convincing piece of evidence. 'missing' lists 2-4 concrete gaps.",
+      "In each criterion note, cite the specific repo or link that justified the score. Write the summary as exactly 3 short lines (max 18 words each). 'strongestSignal' names the single most convincing piece of evidence (repo or link). 'missing' lists 2-4 concrete gaps.",
     ].join("\n");
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
@@ -209,5 +220,38 @@ export const screenApplicant = createServerFn({ method: "POST" })
       throw new Error("The AI returned an unreadable review. Please try again.");
     }
 
-    return { profile, repos, screening };
+    return { profile, repos, links, screening };
   });
+
+export type ApplicantLink = { url: string; kind: string; description: string };
+
+function classify(url: string): string {
+  const u = url.toLowerCase();
+  if (/instagram\.com/.test(u)) return "Instagram";
+  if (/tiktok\.com/.test(u)) return "TikTok";
+  if (/youtube\.com|youtu\.be/.test(u)) return "YouTube";
+  if (/loom\.com|vimeo\.com/.test(u)) return "Demo video";
+  if (/(x|twitter)\.com/.test(u)) return "X / Twitter";
+  if (/linkedin\.com/.test(u)) return "LinkedIn";
+  if (/github\.com/.test(u)) return "GitHub";
+  if (/huggingface\.co/.test(u)) return "Hugging Face";
+  return "Portfolio / site";
+}
+
+function parseLinks(raw: string): ApplicantLink[] {
+  const out: ApplicantLink[] = [];
+  const urlRe = /(https?:\/\/[^\s,]+|(?:www\.)?[a-z0-9-]+\.[a-z]{2,}(?:\/[^\s,]*)?)/gi;
+  for (const line of raw.split(/\n+/)) {
+    const matches = line.match(urlRe) ?? [];
+    const description = line.replace(urlRe, "").replace(/^[\s\-–—:|•*]+|[\s\-–—:|]+$/g, "").trim();
+    for (const m of matches) {
+      const url = /^https?:\/\//i.test(m) ? m : `https://${m}`;
+      let kind = classify(url);
+      if (/demo|walkthrough|showcase/i.test(description) && /Video|YouTube|TikTok/.test(kind + " Video")) {
+        kind = kind === "Portfolio / site" ? kind : `${kind} (demo video)`;
+      }
+      out.push({ url, kind, description });
+    }
+  }
+  return out.slice(0, 30);
+}

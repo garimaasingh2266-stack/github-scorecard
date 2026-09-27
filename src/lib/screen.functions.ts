@@ -247,8 +247,8 @@ function parseLinks(raw: string): ApplicantLink[] {
     for (const m of matches) {
       const url = /^https?:\/\//i.test(m) ? m : `https://${m}`;
       let kind = classify(url);
-      if (/demo|walkthrough|showcase/i.test(description) && /Video|YouTube|TikTok/.test(kind + " Video")) {
-        kind = kind === "Portfolio / site" ? kind : `${kind} (demo video)`;
+      if (/demo|walkthrough|showcase/i.test(description) && /YouTube|TikTok|Instagram|X \/ Twitter|LinkedIn/.test(kind)) {
+        kind = `${kind} (demo video)`;
       }
       out.push({ url, kind, description });
     }

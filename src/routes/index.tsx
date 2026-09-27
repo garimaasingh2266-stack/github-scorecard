@@ -119,7 +119,7 @@ function Index() {
 
         {mutation.isPending ? (
           <p className="mt-10 text-center font-mono text-sm text-muted-foreground">
-            Reading repositories and scoring…
+            Reading repositories and scoring… this can take a couple of minutes.
           </p>
         ) : null}
 

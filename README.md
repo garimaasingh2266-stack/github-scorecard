@@ -1,26 +1,14 @@
-# Talent Scout AI
+# Intern Screener
+Scores applicants for an AI & Tech internship against 6 criteria: open-source AI, AI content creation, automation/MCP, social media, AI-assisted coding & deployment, and cybersecurity.
 
-Build a web app called "Intern Screener". The user pastes a GitHub username and optional social/portfolio links. The app fetches the user's public GitHub profile and repositories using the GitHub public API (name, description, language, stars, last updated). It then sends this data to an AI model and asks it to score the applicant from 0 to 10 on these 6 criteria: 1) Open-source AI & models (LoRAs, fine-tuning), 2) AI content creation (audio/video), 3) Automation & architecture (social media APIs, MCP, workflows), 4) Social media & content strategy, 5) AI-assisted coding & deployment, 6) Cybersecurity. Show each score as a bar, an overall score, a 3-line summary, and "strongest signal" and "missing" sections. Clean, modern design. Include an "Example" button that loads a sample profile.
+**Live app:** https://github-scorecard.lovable.app
+**Demo:** [add Loom link]
 
-This project was built with [Lovable](https://lovable.dev).
+## How it works
+1. Enter a GitHub username, plus optional links with a short note each
+2. Fetches public repos via the GitHub API
+3. AI scores each criterion 0 to 10 and explains which repo or link backs each score
+4. Shows an overall score, summary, and an "Evidence used" list
 
-**Live app**: https://github-scorecard.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/97ba19a2-5fed-4c09-9592-043eb3707746).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+## Built with
+Lovable (AI-assisted coding) · React · TypeScript · GitHub API · AI model for scoring
